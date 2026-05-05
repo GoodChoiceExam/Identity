@@ -1,0 +1,19 @@
+# Build output
+bin/
+obj/
+
+# dotenv
+.env
+.env.*
+
+# Docker override
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.user
