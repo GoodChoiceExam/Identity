@@ -1,19 +1,44 @@
-# Build output
+# Build results
 bin/
 obj/
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
-# dotenv
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Rider
+.idea/
+*.sln.iml
+
+# Environment
 .env
-.env.*
-
-# Docker override
-docker-compose.override.yml
+.env.local
+.env.*.local
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Editors
+# Logs
+*.log
+logs/
+
+# Runtime
+appsettings.*.json
+!appsettings.json
+
+# IDE
 .vscode/
-.idea/
-*.user
+*.swp
+*.swo
+
+# Blazor
+wwwroot/service-worker.js
+wwwroot/service-worker-assets.json
