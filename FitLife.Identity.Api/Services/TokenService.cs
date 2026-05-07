@@ -24,7 +24,7 @@ public class TokenService : ITokenService
         if (!string.IsNullOrEmpty(pemKey))
         {
             rsa = RSA.Create();
-            rsa.ImportFromPem(pemKey);
+            rsa.ImportFromPem(pemKey.Replace("\\n", "\n"));
         }
         else
         {
