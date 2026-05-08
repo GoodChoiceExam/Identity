@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using NLog;
 using NLog.Web;
 
-var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+var logger = LogManager.Setup().LoadConfigurationFromFile("NLog.config").GetCurrentClassLogger();
 
 try
 {
@@ -25,11 +25,19 @@ try
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("Frontend", policy =>
+            policy.WithOrigins("http://localhost:5271")
+                .AllowAnyHeader()
+                .AllowAnyMethod());
+    });
 
     var app = builder.Build();
 
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors("Frontend");
 
     app.MapGet("/healthz", () => Results.Ok(new { status = "healthy" }));
     app.MapControllers();
