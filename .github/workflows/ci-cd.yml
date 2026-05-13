@@ -60,3 +60,11 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Trigger Infrastructure deploy
+        run: |
+          gh workflow run deploy.yml \
+            --repo GoodChoiceExam/Infrastructure \
+            --ref master
+        env:
+          GH_TOKEN: ${{ secrets.DEPLOY_PAT }}
