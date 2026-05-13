@@ -38,6 +38,25 @@ public class AuthController : ControllerBase
         return Ok(_tokenService.GenerateToken(user, roles));
     }
 
+    [HttpPost("register-trainer")]
+    public async Task<IActionResult> RegisterTrainer(RegisterRequest request)
+    {
+        var user = new ApplicationUser
+        {
+            UserName = request.Email,
+            Email = request.Email,
+            FullName = request.FullName
+        };
+
+        var result = await _userManager.CreateAsync(user, request.Password);
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+        
+        await _userManager.AddToRoleAsync(user, "Trainer");
+        var roles = await _userManager.GetRolesAsync(user);
+        return Ok(_tokenService.GenerateToken(user, roles));
+    }
+
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {

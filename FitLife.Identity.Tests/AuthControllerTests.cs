@@ -102,4 +102,38 @@ public class AuthControllerTests
 
         Assert.That(result, Is.InstanceOf<UnauthorizedObjectResult>());
     }
+    
+    [Test]
+    public async Task RegisterTrainer_ValidData_ReturnsOkWithTrainerRole()
+    {
+        var request = new RegisterRequest("Træner Hansen", "trainer@fitlife.dk", "Test1234!");
+        var expectedToken = new TokenResponse("jwt", DateTime.UtcNow.AddHours(1));
+
+        _userManager.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), request.Password))
+            .ReturnsAsync(IdentityResult.Success);
+        _userManager.Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), "Trainer"))
+            .ReturnsAsync(IdentityResult.Success);
+        _userManager.Setup(x => x.GetRolesAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync(["Trainer"]);
+        _tokenService.Setup(x => x.GenerateToken(It.IsAny<ApplicationUser>(), It.IsAny<IList<string>>()))
+            .Returns(expectedToken);
+
+        var result = await _sut.RegisterTrainer(request);
+
+        Assert.That(result, Is.InstanceOf<OkObjectResult>());
+        Assert.That(((OkObjectResult)result).Value, Is.EqualTo(expectedToken));
+    }
+
+    [Test]
+    public async Task RegisterTrainer_DuplicateEmail_ReturnsBadRequest()
+    {
+        var request = new RegisterRequest("Træner Hansen", "dup@fitlife.dk", "Test1234!");
+
+        _userManager.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), request.Password))
+            .ReturnsAsync(IdentityResult.Failed(new IdentityError { Description = "Duplicate" }));
+
+        var result = await _sut.RegisterTrainer(request);
+
+        Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+    }
 }
