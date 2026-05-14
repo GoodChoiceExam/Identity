@@ -39,7 +39,7 @@ public class AuthController : ControllerBase
         return Ok(_tokenService.GenerateToken(user, roles));
     }
 
-    [Authorize(Roles = "Trainer")]
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "Trainer")]
     [HttpPost("register-trainer")]
     public async Task<IActionResult> RegisterTrainer(RegisterRequest request)
     {
