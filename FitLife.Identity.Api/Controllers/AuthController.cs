@@ -1,6 +1,7 @@
 using FitLife.Identity.Api.DTOs;
 using FitLife.Identity.Api.Models;
 using FitLife.Identity.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,6 +39,7 @@ public class AuthController : ControllerBase
         return Ok(_tokenService.GenerateToken(user, roles));
     }
 
+    [Authorize(Roles = "Trainer")]
     [HttpPost("register-trainer")]
     public async Task<IActionResult> RegisterTrainer(RegisterRequest request)
     {
