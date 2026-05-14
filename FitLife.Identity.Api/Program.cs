@@ -26,12 +26,15 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
     builder.Services.AddCors(options =>
-    {
-        options.AddPolicy("Frontend", policy =>
-            policy.WithOrigins("http://localhost:5271")
-                .AllowAnyHeader()
-                .AllowAnyMethod());
-    });
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("Frontend", policy =>
+                policy.WithOrigins(
+                        "http://localhost:5271",
+                        "https://goodchoice.cc")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod());
+        }));
 
     var app = builder.Build();
 
