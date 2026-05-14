@@ -30,8 +30,7 @@ try
         {
             options.AddPolicy("Frontend", policy =>
                 policy.WithOrigins(
-                        "http://localhost:5271",
-                        "https://goodchoice.cc")
+                        "http://localhost:5271")
                     .AllowAnyHeader()
                     .AllowAnyMethod());
         }));
