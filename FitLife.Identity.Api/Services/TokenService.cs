@@ -1,6 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
+using System.Text;
 using FitLife.Identity.Api.DTOs;
 using FitLife.Identity.Api.Models;
 using Microsoft.IdentityModel.Tokens;
@@ -9,34 +9,15 @@ namespace FitLife.Identity.Api.Services;
 
 public class TokenService : ITokenService
 {
-    private readonly RsaSecurityKey _privateKey;
-    private readonly RsaSecurityKey _publicKey;
+    private readonly SymmetricSecurityKey _signingKey;
     private readonly string _issuer;
     private readonly string _audience;
     private readonly int _expiryMinutes;
 
     public TokenService(IConfiguration configuration)
     {
-        var keyId = configuration["Jwt:KeyId"] ?? "fitlife-key-1";
-        var pemKey = configuration["Jwt:RsaPrivateKey"];
-
-        RSA rsa;
-        if (!string.IsNullOrEmpty(pemKey))
-        {
-            rsa = RSA.Create();
-            rsa.ImportFromPem(pemKey.Replace("\\n", "\n"));
-        }
-        else
-        {
-            rsa = RSA.Create(2048); // dev fallback — ny nøgle ved hver genstart
-        }
-
-        _privateKey = new RsaSecurityKey(rsa) { KeyId = keyId };
-
-        var publicRsa = RSA.Create();
-        publicRsa.ImportParameters(rsa.ExportParameters(includePrivateParameters: false));
-        _publicKey = new RsaSecurityKey(publicRsa) { KeyId = keyId };
-
+        var secret = configuration["Jwt:Secret"] ?? throw new InvalidOperationException("Jwt:Secret is not configured");
+        _signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         _issuer = configuration["Jwt:Issuer"] ?? "fitlife-identity";
         _audience = configuration["Jwt:Audience"] ?? "fitlife";
         _expiryMinutes = int.TryParse(configuration["Jwt:ExpiryMinutes"], out var m) ? m : 60;
@@ -59,15 +40,9 @@ public class TokenService : ITokenService
             audience: _audience,
             claims: claims,
             expires: expires,
-            signingCredentials: new SigningCredentials(_privateKey, SecurityAlgorithms.RsaSha256)
+            signingCredentials: new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256)
         );
 
         return new TokenResponse(new JwtSecurityTokenHandler().WriteToken(token), expires);
-    }
-
-    public JsonWebKeySet GetJsonWebKeySet()
-    {
-        var key = JsonWebKeyConverter.ConvertFromRSASecurityKey(_publicKey);
-        return new JsonWebKeySet { Keys = { key } };
     }
 }

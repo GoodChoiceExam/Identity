@@ -19,8 +19,7 @@ public class TokenServiceTests
                 ["Jwt:Issuer"]        = "test-issuer",
                 ["Jwt:Audience"]      = "test-audience",
                 ["Jwt:ExpiryMinutes"] = "60",
-                ["Jwt:KeyId"]         = "test-key-1",
-                ["Jwt:RsaPrivateKey"] = ""
+                ["Jwt:Secret"]        = "test-secret-min-32-chars-long-enough"
             })
             .Build();
         _sut = new TokenService(config);
@@ -37,14 +36,14 @@ public class TokenServiceTests
     }
 
     [Test]
-    public void GenerateToken_TokenUsesRS256()
+    public void GenerateToken_TokenUsesHS256()
     {
         var user = new ApplicationUser { Email = "test@fitlife.dk", FullName = "Test Bruger" };
 
         var result = _sut.GenerateToken(user, []);
 
         var token = new JwtSecurityTokenHandler().ReadJwtToken(result.AccessToken);
-        Assert.That(token.Header.Alg, Is.EqualTo("RS256"));
+        Assert.That(token.Header.Alg, Is.EqualTo("HS256"));
     }
 
     [Test]
@@ -73,14 +72,5 @@ public class TokenServiceTests
 
         Assert.That(result.ExpiresAt,
             Is.InRange(DateTime.UtcNow.AddMinutes(59), DateTime.UtcNow.AddMinutes(61)));
-    }
-
-    [Test]
-    public void GetJsonWebKeySet_ReturnsOneKeyWithCorrectId()
-    {
-        var jwks = _sut.GetJsonWebKeySet();
-
-        Assert.That(jwks.Keys, Has.Count.EqualTo(1));
-        Assert.That(jwks.Keys[0].KeyId, Is.EqualTo("test-key-1"));
     }
 }
