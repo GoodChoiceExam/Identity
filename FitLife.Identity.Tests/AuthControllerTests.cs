@@ -4,6 +4,7 @@ using FitLife.Identity.Api.Models;
 using FitLife.Identity.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace FitLife.Identity.Tests;
