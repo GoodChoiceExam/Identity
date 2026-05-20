@@ -13,11 +13,13 @@ public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ITokenService _tokenService;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService)
+    public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService, ILogger<AuthController> logger)
     {
         _userManager = userManager;
         _tokenService = tokenService;
+        _logger = logger;
     }
 
     [HttpPost("register")]
@@ -68,5 +70,27 @@ public class AuthController : ControllerBase
 
         var roles = await _userManager.GetRolesAsync(user);
         return Ok(_tokenService.GenerateToken(user, roles));
+    }
+
+    [HttpGet("version")]
+    public async Task<Dictionary<string, string>> GetVersion()
+    {
+        var properties = new Dictionary<string, string>();
+        properties.Add("service", "FitLife Identity API");
+        var ver = System.Diagnostics.FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
+        properties.Add("version", ver!);
+        try
+        {
+            var hostName = System.Net.Dns.GetHostName();
+            var ips = await System.Net.Dns.GetHostAddressesAsync(hostName);
+            var ipa = ips.First().MapToIPv4().ToString();
+            properties.Add("hosted-at-address", ipa);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.Message);
+            properties.Add("hosted-at-address", "Could not resolve IP-address");
+        }
+        return properties;
     }
 }
