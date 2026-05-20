@@ -14,12 +14,14 @@ public class AuthController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ITokenService _tokenService;
     private readonly ILogger<AuthController> _logger;
+    private readonly IConfiguration _config;
 
-    public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService, ILogger<AuthController> logger)
+    public AuthController(UserManager<ApplicationUser> userManager, ITokenService tokenService, ILogger<AuthController> logger, IConfiguration config)
     {
         _userManager = userManager;
         _tokenService = tokenService;
         _logger = logger;
+        _config = config;
     }
 
     [HttpPost("register")]
@@ -70,6 +72,22 @@ public class AuthController : ControllerBase
 
         var roles = await _userManager.GetRolesAsync(user);
         return Ok(_tokenService.GenerateToken(user, roles));
+    }
+
+    [HttpGet("service")]
+    public IActionResult GetService()
+    {
+        var isFail = _config["ToFail"] == "yes";
+        var hostname = System.Net.Dns.GetHostName();
+        var seconds = DateTime.Now.Second;
+        var hasError = seconds > 30 && seconds < 45;
+
+        _logger.LogDebug("Fail condition for {Hostname} is set to {IsFail}", hostname, isFail);
+
+        if (hasError && isFail)
+            return StatusCode(503);
+
+        return Ok(new { hostname, seconds });
     }
 
     [HttpGet("version")]
