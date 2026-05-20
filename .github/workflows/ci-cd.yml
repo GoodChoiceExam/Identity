@@ -34,11 +34,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Newman
-        run: npm install -g newman
-
       - name: Run Postman collection
-        run: newman run Postman/identity.postman_collection.json --env-var "baseUrl=http://localhost" --bail
+        run: npx newman run Postman/identity.postman_collection.json --env-var "baseUrl=http://localhost" --bail
 
   publish:
     name: Push to DockerHub
