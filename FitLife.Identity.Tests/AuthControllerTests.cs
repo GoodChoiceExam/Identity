@@ -22,7 +22,8 @@ public class AuthControllerTests
         _userManager = new Mock<UserManager<ApplicationUser>>(
             store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
         _tokenService = new Mock<ITokenService>();
-        _sut = new AuthController(_userManager.Object, _tokenService.Object);
+        var logger = new Mock<ILogger<AuthController>>();
+        _sut = new AuthController(_userManager.Object, _tokenService.Object, logger.Object);
     }
 
     [Test]
