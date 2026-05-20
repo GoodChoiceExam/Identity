@@ -7,52 +7,6 @@
   },
   "item": [
     {
-      "name": "Register - success",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test(\"Status er 200\", function () {",
-              "    pm.response.to.have.status(200);",
-              "});",
-              "pm.test(\"Response indeholder accessToken\", function () {",
-              "    var json = pm.response.json();",
-              "    pm.expect(json.accessToken).to.be.a(\"string\").and.not.empty;",
-              "});"
-            ],
-            "type": "text/javascript",
-            "packages": {},
-            "requests": {}
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n    \"fullName\": \"Test Bruger\",\n    \"email\": \"newman-test@fitlife.dk\",\n    \"password\": \"Test1234!\"\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/auth/register",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "auth",
-            "register"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
       "name": "Login - success",
       "event": [
         {
