@@ -43,7 +43,7 @@ public class AuthController : ControllerBase
         return Ok(_tokenService.GenerateToken(user, roles));
     }
 
-    [Authorize(AuthenticationSchemes = "Bearer", Roles = "Trainer")]
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "Admin")]
     [HttpPost("register-trainer")]
     public async Task<IActionResult> RegisterTrainer(RegisterRequest request)
     {
@@ -57,10 +57,30 @@ public class AuthController : ControllerBase
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
             return BadRequest(result.Errors);
-        
+
         await _userManager.AddToRoleAsync(user, "Trainer");
-        var roles = await _userManager.GetRolesAsync(user);
-        return Ok(_tokenService.GenerateToken(user, roles));
+        _logger.LogInformation("Trainer user created with UserId {UserId} by admin", user.Id);
+        return Ok(new { userId = user.Id, email = user.Email, fullName = user.FullName });
+    }
+
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "Admin")]
+    [HttpPost("register-admin")]
+    public async Task<IActionResult> RegisterAdmin(RegisterRequest request)
+    {
+        var user = new ApplicationUser
+        {
+            UserName = request.Email,
+            Email = request.Email,
+            FullName = request.FullName
+        };
+
+        var result = await _userManager.CreateAsync(user, request.Password);
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        await _userManager.AddToRoleAsync(user, "Admin");
+        _logger.LogInformation("Admin user created with UserId {UserId} by admin", user.Id);
+        return Ok(new { userId = user.Id, email = user.Email, fullName = user.FullName });
     }
 
     [HttpPost("login")]
