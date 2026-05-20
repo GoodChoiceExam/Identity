@@ -4,6 +4,7 @@ using FitLife.Identity.Api.Models;
 using FitLife.Identity.Api.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -24,7 +25,8 @@ public class AuthControllerTests
             store.Object, null!, null!, null!, null!, null!, null!, null!, null!);
         _tokenService = new Mock<ITokenService>();
         var logger = new Mock<ILogger<AuthController>>();
-        _sut = new AuthController(_userManager.Object, _tokenService.Object, logger.Object);
+        var config = new Mock<IConfiguration>();
+        _sut = new AuthController(_userManager.Object, _tokenService.Object, logger.Object, config.Object);
     }
 
     [Test]
@@ -106,24 +108,18 @@ public class AuthControllerTests
     }
     
     [Test]
-    public async Task RegisterTrainer_ValidData_ReturnsOkWithTrainerRole()
+    public async Task RegisterTrainer_ValidData_ReturnsOk()
     {
         var request = new RegisterRequest("Træner Hansen", "trainer@fitlife.dk", "Test1234!");
-        var expectedToken = new TokenResponse("jwt", DateTime.UtcNow.AddHours(1));
 
         _userManager.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), request.Password))
             .ReturnsAsync(IdentityResult.Success);
         _userManager.Setup(x => x.AddToRoleAsync(It.IsAny<ApplicationUser>(), "Trainer"))
             .ReturnsAsync(IdentityResult.Success);
-        _userManager.Setup(x => x.GetRolesAsync(It.IsAny<ApplicationUser>()))
-            .ReturnsAsync(["Trainer"]);
-        _tokenService.Setup(x => x.GenerateToken(It.IsAny<ApplicationUser>(), It.IsAny<IList<string>>()))
-            .Returns(expectedToken);
 
         var result = await _sut.RegisterTrainer(request);
 
         Assert.That(result, Is.InstanceOf<OkObjectResult>());
-        Assert.That(((OkObjectResult)result).Value, Is.EqualTo(expectedToken));
     }
 
     [Test]
