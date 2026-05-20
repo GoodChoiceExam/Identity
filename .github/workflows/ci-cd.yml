@@ -30,7 +30,7 @@ jobs:
   integration-test:
     name: Integration Tests (Newman)
     needs: test
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +38,7 @@ jobs:
         run: npm install -g newman
 
       - name: Run Postman collection
-        run: newman run Postman/identity.postman_collection.json --bail
+        run: newman run Postman/identity.postman_collection.json --env-var "baseUrl=http://localhost" --bail
 
   publish:
     name: Push to DockerHub
