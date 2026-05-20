@@ -4,6 +4,13 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Company>FitLife Digital</Company>
+    <Authors>FitLife Team</Authors>
+    <Copyright>2025 FitLife Digital</Copyright>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>1.0.0</InformationalVersion>
+    <Description>1.0.0 Initial release of FitLife Identity service</Description>
   </PropertyGroup>
 
   <ItemGroup>
