@@ -94,6 +94,22 @@ public class AuthController : ControllerBase
         return Ok(_tokenService.GenerateToken(user, roles));
     }
 
+    [Authorize(AuthenticationSchemes = "Bearer", Roles = "Admin")]
+    [HttpDelete("users/{userId:guid}")]
+    public async Task<IActionResult> DeleteUser(Guid userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user is null)
+            return NotFound();
+
+        var result = await _userManager.DeleteAsync(user);
+        if (!result.Succeeded)
+            return BadRequest(result.Errors);
+
+        _logger.LogInformation("User {UserId} deleted by admin", userId);
+        return NoContent();
+    }
+
     [HttpGet("service")]
     public IActionResult GetService()
     {
