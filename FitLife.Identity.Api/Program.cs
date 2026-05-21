@@ -61,6 +61,7 @@ try
 
     builder.Services.AddAuthorization();
     builder.Services.AddSingleton<ITokenService, TokenService>();
+    builder.Services.AddHostedService<HeartbeatService>();
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
