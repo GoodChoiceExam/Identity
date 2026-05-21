@@ -1,10 +1,11 @@
 using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using AspNetCore.Identity.MongoDbCore.Models;
 using FitLife.Identity.Api.Models;
 using FitLife.Identity.Api.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using NLog;
 using NLog.Web;
 
@@ -42,13 +43,46 @@ try
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
             };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    logger.Warn(context.Exception, "JWT authentication failed");
+                    return Task.CompletedTask;
+                },
+                OnChallenge = context =>
+                {
+                    logger.Warn("Unauthorized request to {Path}", context.Request.Path);
+                    return Task.CompletedTask;
+                }
+            };
         });
 
     builder.Services.AddAuthorization();
     builder.Services.AddSingleton<ITokenService, TokenService>();
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(options =>
+    {
+        options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = ParameterLocation.Header,
+            Description = "Enter a valid JWT Bearer token from the Identity service."
+        });
+
+        options.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+        {
+            {
+                new OpenApiSecuritySchemeReference("Bearer", null, null),
+                []
+            }
+        });
+    });
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("Frontend", policy =>
@@ -61,6 +95,7 @@ try
     });
 
     var app = builder.Build();
+    logger.Info("FitLife Identity API starting");
 
     app.UseSwagger();
     app.UseSwaggerUI();
