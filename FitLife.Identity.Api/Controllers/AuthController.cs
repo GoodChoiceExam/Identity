@@ -126,6 +126,7 @@ public class AuthController : ControllerBase
         return Ok(new { hostname, seconds });
     }
 
+    [AllowAnonymous]
     [HttpGet("version")]
     public async Task<Dictionary<string, string>> GetVersion()
     {
