@@ -34,6 +34,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Opret newman testbruger
+        shell: powershell
+        run: |
+          try {
+            Invoke-RestMethod -Uri "http://localhost/auth/register" `
+              -Method POST `
+              -ContentType "application/json" `
+              -Body '{"email":"newman-test@fitlife.dk","password":"Test1234!","fullName":"Newman Test"}'
+          } catch { }
+
       - name: Run Postman collection
         run: npx newman run Postman/identity.postman_collection.json --env-var "baseUrl=http://localhost" --bail
 
